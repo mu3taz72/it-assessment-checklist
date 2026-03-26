@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة مهام التقييم التقني — هيئة الزراعة والثروة السمكية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0f14;
+    --bg2:       #13161e;
+    --bg3:       #1a1d28;
+    --bg4:       #20243200;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.13);
+    --text:      #e8eaf0;
+    --text2:     #8b8fa8;
+    --text3:     #555870;
+    --red:       #e05555;
+    --red-bg:    rgba(224,85,85,0.12);
+    --amber:     #e09830;
+    --amber-bg:  rgba(224,152,48,0.12);
+    --blue:      #4a9eff;
+    --blue-bg:   rgba(74,158,255,0.12);
+    --teal:      #38c9a0;
+    --teal-bg:   rgba(56,201,160,0.12);
+    --purple:    #9d7ff0;
+    --purple-bg: rgba(157,127,240,0.12);
+    --gray-bg:   rgba(255,255,255,0.06);
+    --done:      #3d9e6a;
+    --radius:    10px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: .4;
+  }
+
+  /* ── GLOW ORBS ── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: .18;
+  }
+  .orb-1 { width: 600px; height: 600px; background: #3c3489; top: -200px; right: -150px; }
+  .orb-2 { width: 400px; height: 400px; background: #0f6e56; bottom: 100px; left: -100px; }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.25rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 2.5rem 0 2rem;
+    border-bottom: 0.5px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .header-org {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--teal);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+  .header-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── SUMMARY CARDS ── */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 10px;
+    margin-bottom: 1.75rem;
+  }
+  @media(max-width:560px){ .summary { grid-template-columns: repeat(2,1fr); } }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    text-align: center;
+    transition: border-color .2s;
+  }
+  .stat-card:hover { border-color: var(--border2); }
+  .stat-num {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 11.5px; color: var(--text2); }
+
+  /* ── PROGRESS BAR GLOBAL ── */
+  .global-progress {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .gp-label { font-size: 12px; color: var(--text2); white-space: nowrap; }
+  .gp-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .gp-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--teal), var(--blue));
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+  }
+  .gp-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    min-width: 36px;
+    text-align: left;
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+  .filter-btn {
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { background: var(--bg3); color: var(--text); }
+  .filter-btn.active { color: var(--text); }
+  .filter-btn.active[data-tag="all"]    { background: var(--purple-bg); border-color: var(--purple); color: var(--purple); }
+  .filter-btn.active[data-tag="حرجة"]  { background: var(--red-bg);    border-color: var(--red);    color: var(--red); }
+  .filter-btn.active[data-tag="عاجلة"] { background: var(--amber-bg);  border-color: var(--amber);  color: var(--amber); }
+  .filter-btn.active[data-tag="مهمة"]  { background: var(--blue-bg);   border-color: var(--blue);   color: var(--blue); }
+  .filter-btn.active[data-tag="تحليل"] { background: var(--teal-bg);   border-color: var(--teal);   color: var(--teal); }
+  .filter-btn.active[data-tag="تقرير"] { background: var(--purple-bg); border-color: var(--purple); color: var(--purple); }
+  .filter-btn.active[data-tag="متابعة"]{ background: var(--gray-bg);   border-color: var(--border2);color: var(--text); }
+
+  .reset-btn {
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    margin-right: auto;
+    transition: all .15s;
+  }
+  .reset-btn:hover { color: var(--red); border-color: var(--red); }
+
+  /* ── PHASE BLOCK ── */
+  .phase {
+    margin-bottom: 1rem;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .phase:hover { border-color: var(--border2); }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s;
+    position: relative;
+  }
+  .phase-header:hover { background: rgba(255,255,255,.02); }
+
+  .phase-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .phase-info { flex: 1; min-width: 0; }
+  .phase-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .phase-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .phase-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .phase-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .phase-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--text3);
+    transition: transform .2s;
+    flex-shrink: 0;
+  }
+  .phase.collapsed .phase-chevron { transform: rotate(-90deg); }
+
+  .phase-bar {
+    height: 2px;
+    background: var(--border);
+  }
+  .phase-bar-fill {
+    height: 100%;
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── TASK LIST ── */
+  .task-list {
+    border-top: 0.5px solid var(--border);
+  }
+  .phase.collapsed .task-list { display: none; }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: background .12s;
+    position: relative;
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-item:hover { background: rgba(255,255,255,.025); }
+  .task-item.done { opacity: .45; }
+  .task-item.done .task-text { text-decoration: line-through; color: var(--text3); }
+
+  /* checkbox */
+  .cb {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+    background: transparent;
+  }
+  .task-item.done .cb {
+    border-color: transparent;
+  }
+  .cb svg { width: 12px; height: 12px; opacity: 0; transition: opacity .15s; }
+  .task-item.done .cb svg { opacity: 1; }
+
+  .task-body { flex: 1; min-width: 0; }
+  .task-text {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .task-sub {
+    font-size: 11.5px;
+    color: var(--text2);
+    margin-top: 3px;
+    line-height: 1.45;
+  }
+  .task-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .week-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    white-space: nowrap;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text3);
+    font-size: 13px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .footer-text {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .save-indicator {
+    font-size: 11px;
+    color: var(--teal);
+    font-family: 'JetBrains Mono', monospace;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .save-indicator.show { opacity: 1; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .phase { animation: fadeIn .3s ease both; }
+  .phase:nth-child(1) { animation-delay: .05s; }
+  .phase:nth-child(2) { animation-delay: .10s; }
+  .phase:nth-child(3) { animation-delay: .15s; }
+  .phase:nth-child(4) { animation-delay: .20s; }
+  .phase:nth-child(5) { animation-delay: .25s; }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:500px){
+    .task-right { display: none; }
+    .phase-sub  { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-top">
+      <div>
+        <div class="header-org">هيئة الزراعة والثروة السمكية — الكويت</div>
+        <div class="header-title">قائمة مهام التقييم التقني الشامل</div>
+        <div class="header-sub">IT Infrastructure &amp; Systems Assessment Checklist — مرتبة حسب الأولوية</div>
+      </div>
+      <div class="header-date" id="live-date"></div>
+    </div>
+  </header>
+
+  <!-- SUMMARY -->
+  <div class="summary" id="summary"></div>
+
+  <!-- GLOBAL PROGRESS -->
+  <div class="global-progress">
+    <span class="gp-label">الإنجاز الكلي</span>
+    <div class="gp-track"><div class="gp-fill" id="gp-fill" style="width:0%"></div></div>
+    <span class="gp-pct" id="gp-pct">0%</span>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-bar" id="filter-bar"></div>
+
+  <!-- PHASES -->
+  <div id="phases-container"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-text">البيانات محفوظة تلقائياً في المتصفح</span>
+    <span class="save-indicator" id="save-indicator">✓ تم الحفظ</span>
+    <button class="reset-btn" onclick="confirmReset()">إعادة ضبط الكل</button>
+  </footer>
+
+</div>
+
+<script>
+const PHASES = [
+  {
+    id:'p1',
+    label:'المرحلة الأولى — إجراءات فورية وعاجلة',
+    sub:'أسبوع 1–2',
+    color:'#e05555',
+    tasks:[
+      {id:'t01', text:'الحصول على خطاب إذن رسمي موقّع من الإدارة العليا', sub:'الأساس القانوني لكل خطوة تالية — بدونه لا تبدأ', tag:'حرجة', week:'أسبوع 1'},
+      {id:'t02', text:'تشكيل فريق العمل وتحديد نقاط الاتصال في كل قسم', sub:'مدير شبكة + مدير أنظمة + ممثل من كل قسم تشغيلي', tag:'حرجة', week:'أسبوع 1'},
+      {id:'t03', text:'تغيير جميع كلمات المرور الافتراضية للأجهزة الشبكية', sub:'كل جهاز بكلمة مرور افتراضية = باب مفتوح للاختراق', tag:'حرجة', week:'أسبوع 1'},
+      {id:'t04', text:'إغلاق منفذ Telnet (23) على الجهاز المجهول 10.0.1.88', sub:'مكتشف في المسح — بروتوكول غير مشفر وخطير أمنياً', tag:'حرجة', week:'أسبوع 1'},
+      {id:'t05', text:'التحقق من النسخ الاحتياطي واختبار استعادة ملف فعلي', sub:'إذا لم يُختبر الـ Backup فهو غير موجود فعلياً', tag:'حرجة', week:'أسبوع 1'},
+      {id:'t06', text:'عزل الخادم SRV-APP-01 (Windows 2012 R2) أو ترقيته فوراً', sub:'نظام تشغيل منتهي الدعم الأمني = ثغرة مفتوحة', tag:'حرجة', week:'أسبوع 1–2'},
+      {id:'t07', text:'تثبيت أداة مراقبة (PRTG أو SolarWinds) وتشغيلها', sub:'تحتاج أسبوعاً كاملاً من البيانات — ابدأ الآن', tag:'عاجلة', week:'أسبوع 1'},
+      {id:'t08', text:'تشغيل مسح Nmap الشامل على الشبكة بالكامل', sub:'لاكتشاف جميع الأجهزة المتصلة والمنافذ المفتوحة', tag:'عاجلة', week:'أسبوع 1'},
+      {id:'t09', text:'تشغيل فحص الثغرات الأمنية بـ Nessus أو OpenVAS', sub:'يأخذ وقتاً — شغّله مبكراً واقرأ النتائج لاحقاً', tag:'عاجلة', week:'أسبوع 1'},
+      {id:'t10', text:'استخراج قائمة التراخيص البرمجية وتواريخ انتهائها', sub:'تجنّب المفاجآت القانونية والانقطاع المفاجئ للخدمات', tag:'عاجلة', week:'أسبوع 2'},
+    ]
+  },
+  {
+    id:'p2',
+    label:'المرحلة الثانية — الرصد والجمع الميداني',
+    sub:'أسبوع 2–4',
+    color:'#4a9eff',
+    tasks:[
+      {id:'t11', text:'توزيع استبيان المستخدمين على جميع الأقسام', sub:'استخدم النموذج الجاهز — اهدف لـ 80% نسبة استجابة', tag:'مهمة', week:'أسبوع 2'},
+      {id:'t12', text:'إجراء مقابلات مع فريق تقنية المعلومات', sub:'استخدم دليل المقابلة الجاهز وسجّل الإجابات فورياً', tag:'مهمة', week:'أسبوع 2'},
+      {id:'t13', text:'إجراء مقابلات مع مديري الأقسام التشغيلية', sub:'ركّز على الألم اليومي والعمليات اليدوية المتكررة', tag:'مهمة', week:'أسبوع 2–3'},
+      {id:'t14', text:'تعبئة قائمة التحقق الميدانية في غرفة الخوادم', sub:'التبريد، UPS، التوصيلات، الأمان الجسدي، التسمية', tag:'مهمة', week:'أسبوع 2'},
+      {id:'t15', text:'تعبئة قائمة التحقق الميدانية في جميع الطوابق', sub:'الشبكة، WiFi، محطات العمل، الكابلات، الأمان', tag:'مهمة', week:'أسبوع 2–3'},
+      {id:'t16', text:'جرد الخوادم كاملاً في ورقة جرد الأصول', sub:'الاسم، IP، OS، الذاكرة، التخزين، نسبة الاستخدام', tag:'مهمة', week:'أسبوع 2'},
+      {id:'t17', text:'جرد أجهزة الشبكة (سويتشات، راوترات، جدران الحماية)', sub:'الموديل، Firmware، تاريخ انتهاء الدعم، الموقع', tag:'مهمة', week:'أسبوع 2'},
+      {id:'t18', text:'جرد محطات العمل بالتنسيق مع نقاط الاتصال', sub:'النوع، العمر التقريبي، نظام التشغيل، القسم', tag:'مهمة', week:'أسبوع 3'},
+      {id:'t19', text:'تجميع جميع الوثائق الموجودة (مخططات، عقود، سياسات)', sub:'كل وثيقة غير موجودة يُدوَّن غيابها — نتيجة بحد ذاتها', tag:'مهمة', week:'أسبوع 3'},
+      {id:'t20', text:'قراءة بيانات أسبوع كامل من أداة المراقبة', sub:'الذروة، الاختناقات، التنبيهات، أوقات الانقطاع', tag:'مهمة', week:'أسبوع 2–3'},
+      {id:'t21', text:'تسجيل نتائج مسح الشبكة في ورقة "تحليل شبكة الاتصالات"', sub:'كل جهاز مكتشف مقارنة بالسجل الرسمي — رصد الفجوة', tag:'مهمة', week:'أسبوع 3'},
+      {id:'t22', text:'فحص قواعد البيانات: الحجم، الفهرسة، الاستعلامات البطيئة', sub:'أي استعلام يستغرق أكثر من ثانية = يستحق التوثيق', tag:'مهمة', week:'أسبوع 3'},
+    ]
+  },
+  {
+    id:'p3',
+    label:'المرحلة الثالثة — التحليل والتشخيص',
+    sub:'أسبوع 4–6',
+    color:'#38c9a0',
+    tasks:[
+      {id:'t23', text:'قراءة نتائج Nessus وتصنيف الثغرات (Critical / High / Medium)', sub:'لا تعالج كل شيء دفعة واحدة — ابدأ بالـ Critical فقط', tag:'تحليل', week:'أسبوع 4'},
+      {id:'t24', text:'تحليل نتائج الاستبيانات واستخلاص الأنماط المتكررة', sub:'ما ذكره 3+ موظفين = مشكلة حقيقية لا استثناء فردي', tag:'تحليل', week:'أسبوع 4'},
+      {id:'t25', text:'تحليل نتائج مقابلات فريق IT واستخلاص المخاطر الخفية', sub:'ركّز على ما يتجنبون تحديثه وما يقلقهم فعلاً', tag:'تحليل', week:'أسبوع 4'},
+      {id:'t26', text:'تعبئة مصفوفة تقييم المخاطر (الاحتمالية × التأثير)', sub:'لكل نقطة ضعف: 1–5 لكل بُعد، الضرب يعطي الأولوية', tag:'تحليل', week:'أسبوع 4–5'},
+      {id:'t27', text:'تحليل أداء الروابط الشبكية وتحديد الاختناقات', sub:'أي رابط فوق 70% استخداماً = يحتاج توصية فورية', tag:'تحليل', week:'أسبوع 4'},
+      {id:'t28', text:'مقارنة الأجهزة المكتشفة بالسجل الرسمي والتحقيق في الفجوة', sub:'كل جهاز غير موثّق يحتاج تصنيفاً وقراراً', tag:'تحليل', week:'أسبوع 5'},
+      {id:'t29', text:'تقييم مستوى التكامل بين الأنظمة والتطبيقات', sub:'خريطة "من يتحدث مع من" — الفجوات تكشف العمل اليدوي', tag:'تحليل', week:'أسبوع 5'},
+      {id:'t30', text:'تصنيف جميع النواقص: حرجة / مرتفعة / متوسطة / منخفضة', sub:'استخدم مصفوفة المخاطر الموجودة في ملف Excel', tag:'تحليل', week:'أسبوع 5'},
+    ]
+  },
+  {
+    id:'p4',
+    label:'المرحلة الرابعة — التقرير وخارطة الطريق',
+    sub:'أسبوع 6–8',
+    color:'#e09830',
+    tasks:[
+      {id:'t31', text:'كتابة الملخص التنفيذي (صفحة واحدة للقيادة)', sub:'أبرز 5 نتائج + التوصية الأهم — بلغة الأثر لا التقنية', tag:'تقرير', week:'أسبوع 6'},
+      {id:'t32', text:'كتابة النتائج التفصيلية لكل محور بالأرقام والأمثلة', sub:'رقم واحد ملموس أقنع من فقرة نصية كاملة', tag:'تقرير', week:'أسبوع 6'},
+      {id:'t33', text:'بناء خطة العمل الفورية (0–3 أشهر) مع مسؤول لكل بند', sub:'كل بند: ماذا + من + متى + التكلفة التقديرية', tag:'تقرير', week:'أسبوع 6–7'},
+      {id:'t34', text:'بناء خطة العمل قصيرة المدى (3–12 شهر)', sub:'المشاريع التي تحتاج تخطيطاً وميزانية وقرار قيادي', tag:'تقرير', week:'أسبوع 7'},
+      {id:'t35', text:'بناء رؤية التحول الرقمي (1–3 سنوات)', sub:'السحابة، الأتمتة، منصة البيانات — موجّهة للقيادة العليا', tag:'تقرير', week:'أسبوع 7'},
+      {id:'t36', text:'تعبئة نموذج التقرير النهائي الموجود في ملف Word', sub:'المعلومات + الملخص + النتائج + خطة العمل + التوقيعات', tag:'تقرير', week:'أسبوع 7'},
+      {id:'t37', text:'مراجعة التقرير مع مدير IT قبل الرفع للقيادة', sub:'للتحقق من الدقة التقنية وتجنّب الأخطاء المحرجة', tag:'تقرير', week:'أسبوع 7–8'},
+      {id:'t38', text:'عرض التقرير على الإدارة العليا والحصول على الموافقة', sub:'ركّز على التأثير والمخاطر — اجعل القرار سهلاً', tag:'تقرير', week:'أسبوع 8'},
+    ]
+  },
+  {
+    id:'p5',
+    label:'المرحلة الخامسة — المتابعة والتنفيذ المستمر',
+    sub:'شهر 3 وما بعده',
+    color:'#9d7ff0',
+    tasks:[
+      {id:'t39', text:'تحديث ورقة جرد الأصول بعد كل تغيير في البنية التحتية', sub:'الجرد الحي أهم من الجرد الأولي — الانضباط يبني الثقة', tag:'متابعة', week:'مستمر'},
+      {id:'t40', text:'اختبار الـ Backup شهرياً وتوثيق نتيجة الاختبار', sub:'استعادة ملف حقيقي — ليس فقط التحقق من وجود النسخة', tag:'متابعة', week:'شهري'},
+      {id:'t41', text:'مراجعة مصفوفة المخاطر كل ثلاثة أشهر وتحديثها', sub:'المخاطر تتغير — ما كان متوسطاً قد يصبح حرجاً', tag:'متابعة', week:'ربعي'},
+      {id:'t42', text:'متابعة تنفيذ خطة العمل وتحديث حالة كل بند أسبوعياً', sub:'استخدم ورقة نموذج التقرير لتتبع التقدم والإنجازات', tag:'متابعة', week:'أسبوعي'},
+      {id:'t43', text:'تشغيل مسح ثغرات جديد بعد أي تغيير كبير في البنية', sub:'كل ترقية أو جهاز جديد = سطح هجوم جديد محتمل', tag:'متابعة', week:'عند الحاجة'},
+      {id:'t44', text:'تحديث مخطط الشبكة (Topology Diagram) بعد أي تعديل', sub:'المخطط القديم أسوأ من عدم وجود مخطط — يُضلّل', tag:'متابعة', week:'عند التغيير'},
+    ]
+  }
+];
+
+const TAG_STYLE = {
+  'حرجة':  'background:#e0555520;color:#e05555;border:0.5px solid #e0555540',
+  'عاجلة': 'background:#e0983020;color:#e09830;border:0.5px solid #e0983040',
+  'مهمة':  'background:#4a9eff20;color:#4a9eff;border:0.5px solid #4a9eff40',
+  'تحليل': 'background:#38c9a020;color:#38c9a0;border:0.5px solid #38c9a040',
+  'تقرير': 'background:#9d7ff020;color:#9d7ff0;border:0.5px solid #9d7ff040',
+  'متابعة':'background:#ffffff10;color:#8b8fa8;border:0.5px solid #ffffff20',
+};
+
+const STORAGE_KEY = 'ita_checklist_v1';
+let state = {};
+let filter = 'all';
+let collapsed = {};
+
+function loadState() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    state = d.tasks || {};
+    collapsed = d.collapsed || {};
+  } catch(e) {}
+  PHASES.forEach(p => p.tasks.forEach(t => { if(!(t.id in state)) state[t.id] = false; }));
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ tasks: state, collapsed }));
+    const ind = document.getElementById('save-indicator');
+    ind.classList.add('show');
+    setTimeout(() => ind.classList.remove('show'), 1800);
+  } catch(e) {}
+}
+
+function getStats() {
+  const all = Object.keys(state);
+  const done = all.filter(k => state[k]);
+  const critTasks = PHASES[0].tasks;
+  const critDone = critTasks.filter(t => state[t.id]);
+  return {
+    total: all.length,
+    done: done.length,
+    critTotal: critTasks.length,
+    critDone: critDone.length,
+    pct: all.length ? Math.round(done.length / all.length * 100) : 0
+  };
+}
+
+function renderDate() {
+  const now = new Date();
+  const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  document.getElementById('live-date').textContent =
+    `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function renderSummary() {
+  const s = getStats();
+  document.getElementById('summary').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--red)">${s.critTotal - s.critDone}</div>
+      <div class="stat-label">حرجة متبقية</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--text)">${s.total - s.done}</div>
+      <div class="stat-label">إجمالي المتبقية</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--teal)">${s.done}</div>
+      <div class="stat-label">مكتملة</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--blue)">${s.pct}%</div>
+      <div class="stat-label">نسبة الإنجاز</div>
+    </div>
+  `;
+  const fill = document.getElementById('gp-fill');
+  const pct  = document.getElementById('gp-pct');
+  fill.style.width = s.pct + '%';
+  pct.textContent  = s.pct + '%';
+}
+
+function renderFilters() {
+  const tags = [
+    {id:'all',    label:'الكل'},
+    {id:'حرجة',  label:'حرجة'},
+    {id:'عاجلة', label:'عاجلة'},
+    {id:'مهمة',  label:'مهمة'},
+    {id:'تحليل', label:'تحليل'},
+    {id:'تقرير', label:'تقرير'},
+    {id:'متابعة',label:'متابعة'},
+  ];
+  document.getElementById('filter-bar').innerHTML =
+    `<button class="reset-btn" onclick="confirmReset()">إعادة ضبط ✕</button>` +
+    tags.map(t =>
+      `<button class="filter-btn ${filter===t.id?'active':''}" data-tag="${t.id}" onclick="setFilter('${t.id}')">${t.label}</button>`
+    ).join('');
+}
+
+function renderPhases() {
+  const container = document.getElementById('phases-container');
+  container.innerHTML = '';
+
+  PHASES.forEach(ph => {
+    const tasks = filter === 'all' ? ph.tasks : ph.tasks.filter(t => t.tag === filter);
+    if (!tasks.length) return;
+
+    const doneCnt = tasks.filter(t => state[t.id]).length;
+    const pct = tasks.length ? Math.round(doneCnt / tasks.length * 100) : 0;
+    const isCollapsed = collapsed[ph.id];
+
+    const div = document.createElement('div');
+    div.className = 'phase' + (isCollapsed ? ' collapsed' : '');
+    div.id = 'phase-' + ph.id;
+
+    div.innerHTML = `
+      <div class="phase-header" onclick="togglePhase('${ph.id}')">
+        <div class="phase-dot" style="background:${ph.color}"></div>
+        <div class="phase-info">
+          <div class="phase-title" style="color:${ph.color}">${ph.label}</div>
+          <div class="phase-sub">${ph.sub}</div>
+        </div>
+        <div class="phase-right">
+          <span class="phase-count">${doneCnt} / ${tasks.length}</span>
+          <svg class="phase-chevron" viewBox="0 0 16 16" fill="none">
+            <polyline points="4,6 8,10 12,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="phase-bar">
+        <div class="phase-bar-fill" style="width:${pct}%;background:${ph.color}"></div>
+      </div>
+      <div class="task-list">
+        ${tasks.map(t => {
+          const done = state[t.id];
+          const ts = TAG_STYLE[t.tag] || '';
+          return `<div class="task-item ${done?'done':''}" onclick="toggleTask('${t.id}')">
+            <div class="cb" style="${done ? 'background:'+ph.color : ''}">
+              <svg viewBox="0 0 12 9" fill="none">
+                <polyline points="1.5,4.5 4.5,7.5 10.5,1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="task-body">
+              <div class="task-text">${t.text}</div>
+              <div class="task-sub">${t.sub}</div>
+            </div>
+            <div class="task-right">
+              <span class="tag" style="${ts}">${t.tag}</span>
+              <span class="week-label">${t.week}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  if (!container.children.length) {
+    container.innerHTML = '<div class="empty">لا توجد مهام في هذه الفئة</div>';
+  }
+}
+
+function toggleTask(id) {
+  state[id] = !state[id];
+  saveState();
+  render();
+}
+
+function togglePhase(id) {
+  collapsed[id] = !collapsed[id];
+  saveState();
+  const el = document.getElementById('phase-' + id);
+  if (el) el.classList.toggle('collapsed', collapsed[id]);
+}
+
+function setFilter(f) {
+  filter = f;
+  render();
+}
+
+function confirmReset() {
+  if (confirm('هل أنت متأكد من إعادة ضبط جميع المهام؟\nسيتم مسح كل التقدم المحفوظ.')) {
+    Object.keys(state).forEach(k => state[k] = false);
+    saveState();
+    render();
+  }
+}
+
+function render() {
+  renderDate();
+  renderSummary();
+  renderFilters();
+  renderPhases();
+}
+
+loadState();
+render();
+setInterval(renderDate, 60000);
+</script>
+</body>
+</html>
